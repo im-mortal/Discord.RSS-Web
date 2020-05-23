@@ -3,23 +3,39 @@ const Article = DiscordRSS.Article
 const FeedFetcher = DiscordRSS.FeedFetcher
 const FailRecord = DiscordRSS.FailRecord
 const Feed = DiscordRSS.Feed
-const ArticleModel = DiscordRSS.models.Article.model
+const FeedData = DiscordRSS.FeedData
+const configServices = require('./config.js')
 
 /**
- * @param {string} url
- * @param {Object<string, any>} profile
+ * @param {import('discord.rss').Feed} feed
  */
-async function getFeedPlaceholders (url, profile) {
-  const { articleList } = await FeedFetcher.fetchFeed(url)
+async function getFeedPlaceholders (feed) {
+  const { articleList } = await FeedFetcher.fetchFeed(feed.url)
   const allPlaceholders = []
   if (articleList.length === 0) {
     return allPlaceholders
   }
+  const feedData = await FeedData.ofFeed(feed)
   for (const article of articleList) {
-    const parsed = new Article(article, profile)
+    const parsed = new Article(article, feedData)
     allPlaceholders.push(parsed.toJSON())
   }
   return allPlaceholders
+}
+
+/**
+ *
+ * @param {string} feedURL
+ */
+async function getAnonymousFeedPlaceholders (feedURL) {
+  const feedConfig = await configServices.getFeedConfig()
+  const dummyFeed = new Feed({
+    ...feedConfig,
+    guild: '1',
+    channel: '1',
+    url: feedURL
+  })
+  return module.exports.getFeedPlaceholders(dummyFeed)
 }
 
 /**
@@ -74,7 +90,7 @@ async function deleteFeed (feedID) {
 async function getDatabaseArticles (feed, shardID) {
   // Schedule name must be determined
   const schedule = await feed.determineSchedule()
-  const data = await ArticleModel.find({
+  const data = await DiscordRSS.models.Article.Model.find({
     scheduleName: schedule.name,
     feedURL: feed.url,
     shardID
@@ -99,6 +115,7 @@ async function getFeedsOfGuild (guildID) {
 }
 
 module.exports = {
+  getAnonymousFeedPlaceholders,
   getFeedPlaceholders,
   getFeedOfGuild,
   createFeed,

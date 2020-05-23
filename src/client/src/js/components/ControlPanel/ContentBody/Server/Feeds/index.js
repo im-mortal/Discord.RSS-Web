@@ -15,7 +15,7 @@ import { Redirect } from 'react-router-dom'
 import pages from 'js/constants/pages'
 import { changePage } from 'js/actions/page'
 
-const mql = window.matchMedia(`(min-width: 1475px)`)
+const mql = window.matchMedia('(min-width: 1475px)')
 
 const MainContent = styled.div`
   padding: 20px;
@@ -107,7 +107,8 @@ function Feeds (props) {
             channelDropdownOptions={channelDropdownOptions}
             onDeletedFeed={() => setSelectedFeedID('')}
             redirect={redirect}
-            smallerScreen={!mql.matches} />
+            smallerScreen={!mql.matches}
+          />
         }
         docked={keepSidebar}
         open={!!selectedFeedID}
@@ -119,18 +120,26 @@ function Feeds (props) {
           <MainContent ref={bodyRef}>
             <PageHeader heading='Feed Management' subheading='Manage and edit your feeds.' />
             <Divider />
-            <SectionTitle heading='Current' subheading='View and your current feeds.' sideComponent={
-              <FeedLimitContainer>
-                <Popup
-                  content={<span>Need more? <a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'>Become a supporter!</a></span>}
-                  position='left center'
-                  hideOnScroll
-                  hoverable
-                  inverted
-                  trigger={<span>{tableItems.length}/{activeGuild.limit === 0 ? '∞' : activeGuild.limit}</span>} />
-                <a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'><Icon color='green' name='arrow circle up' /></a>
-              </FeedLimitContainer>
-            } />
+            <SectionTitle
+              heading='Current' subheading='View and edit your current feeds.' sideComponent={
+                <FeedLimitContainer>
+                  {activeGuild.limit !== 0
+                    ? (
+                      <div>
+                        <Popup
+                          content={<span>Need more? <a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'>Become a supporter!</a></span>}
+                          position='left center'
+                          hideOnScroll
+                          hoverable
+                          inverted
+                          trigger={<span>{tableItems.length}/{activeGuild.limit === 0 ? '∞' : activeGuild.limit}</span>}
+                        />
+                        <a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'><Icon color='green' name='arrow circle up' /></a>
+                      </div>)
+                    : null}
+                </FeedLimitContainer>
+              }
+            />
             <PaginatedTable.Table
               basic
               unstackable
@@ -147,19 +156,19 @@ function Feeds (props) {
                     active={feed._id === selectedFeedID}
                     style={{ cursor: 'pointer' }}
                     key={feed._id}
-                    onClick={e => onClickFeedRow(feed)}>
+                    onClick={e => onClickFeedRow(feed)}
+                  >
                     {/* <PaginatedTable.Cell collapsing>
                     <CheckboxWrapper>
                       <Checkbox />
                     </CheckboxWrapper>
                   </PaginatedTable.Cell> */}
                     <PaginatedTable.Cell collapsing>
-                      { feed.disabled
+                      {feed.disabled
                         ? <Icon name='warning circle' style={{ fontSize: '18px' }} color='yellow' />
                         : failed
                           ? <Icon name='dont' style={{ fontSize: '18px' }} color='red' />
-                          : <Icon name='check circle' style={{ fontSize: '18px' }} color='green' />
-                      }
+                          : <Icon name='check circle' style={{ fontSize: '18px' }} color='green' />}
                     </PaginatedTable.Cell>
                     <PaginatedTable.Cell>{feed.title}</PaginatedTable.Cell>
                     <PaginatedTable.Cell>{feed.url}</PaginatedTable.Cell>
@@ -174,16 +183,21 @@ function Feeds (props) {
                   }
                 }
                 return false
-              }} />
+              }}
+            />
             <Divider />
             <SectionTitle
               heading='Add'
               subheading={
                 <span>
-                  {`Add a new feed. You may have a maximum of ${activeGuild.limit === 0 ? '∞' : activeGuild.limit} feeds. Need more? `}
-                  <a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'>
-                    Become a supporter!
-                  </a></span>} />
+                  {`Add a new feed. You may have a maximum of ${activeGuild.limit === 0 ? '∞' : activeGuild.limit} feeds.`}
+                  {activeGuild.limit !== 0
+                    ? ` Need more? ${<a href='https://www.patreon.com/discordrss' target='_blank' rel='noopener noreferrer'>Become a supporter!</a>}`
+                    : ''}
+
+                </span>
+              }
+            />
             <AddFeed channelDropdownOptions={channelDropdownOptions} />
             <Divider />
           </MainContent>

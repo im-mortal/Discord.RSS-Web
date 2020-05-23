@@ -29,15 +29,15 @@ class Role extends Base {
     return {
       REDIS_KEYS: {
         role: roleID => {
-          if (!roleID) throw new TypeError(`Role ID must be provided`)
+          if (!roleID) throw new TypeError('Role ID must be provided')
           return `drss_role_${roleID}`
         },
         rolesOfGuild: guildID => { // This is a SET.
-          if (!guildID) throw new TypeError(`Guild ID must be provided`)
+          if (!guildID) throw new TypeError('Guild ID must be provided')
           return `drss_guild_${guildID}_roles`
         },
         managerRolesOfGuild: guildID => {
-          if (!guildID) throw new TypeError(`Guild ID must be provided`)
+          if (!guildID) throw new TypeError('Guild ID must be provided')
           return `drss_guild_${guildID}_roles_managers`
         }
       },
@@ -70,7 +70,7 @@ class Role extends Base {
       update: async (redisClient, oldRole, newRole) => {
         if (!(oldRole instanceof Discord.Role) || !(newRole instanceof Discord.Role)) throw new TypeError('Role is not instance of Discord.Role')
         const exists = await promisify(redisClient.exists).bind(redisClient)(this.utils.REDIS_KEYS.role(newRole.id))
-        if (!exists) return this.utils.recognize(newRole)
+        if (!exists) return this.utils.recognize(redisClient, newRole)
         const toStore = {}
         let u = 0
         this.utils.JSON_KEYS.forEach(key => {

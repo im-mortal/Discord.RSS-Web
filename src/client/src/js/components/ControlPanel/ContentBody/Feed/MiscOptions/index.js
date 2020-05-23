@@ -12,6 +12,7 @@ import { fetchEditFeed } from 'js/actions/feeds'
 import { changePage } from 'js/actions/page'
 import pages from 'js/constants/pages'
 import { Redirect } from 'react-router-dom'
+import Loading from '../../common/Loading'
 
 const Container = styled.div`
   padding: 20px;
@@ -63,6 +64,7 @@ const configKeyNames = {
 function MiscOptions () {
   const botConfig = useSelector(state => state.botConfig)
   const editing = useSelector(feedSelectors.feedEditing)
+  const feedsFetching = useSelector(feedSelectors.feedsFetching)
   const feed = useSelector(feedSelectors.activeFeed)
   const [userCheckTitles, setUserCheckTitles] = useState(feed && feed.ncomparisons.includes('title'))
   const [userValues, setUserValues] = useState({})
@@ -72,7 +74,9 @@ function MiscOptions () {
     dispatch(changePage(pages.MISC_OPTIONS))
   }, [dispatch])
 
-  if (!feed) {
+  if (feedsFetching) {
+    return <Loading />
+  } if (!feed) {
     dispatch(changePage(pages.DASHBOARD))
     return <Redirect to={pages.DASHBOARD} />
   }
@@ -116,7 +120,6 @@ function MiscOptions () {
       vals.ncomparisons = []
     }
     await dispatch(fetchEditFeed(feed.guild, feed._id, vals))
-    reset()
   }
 
   const reset = () => {
@@ -150,7 +153,7 @@ function MiscOptions () {
           <MiscOptionContainer>
             <div>
               <SectionItemTitle>Date Checks</SectionItemTitle>
-              <Description>Date checking ensures that articles that are either older than {botConfig.cycleMaxAge} day{botConfig.cycleMaxAge > 1 ? 's' : ''} or has invalid/no published dates are never sent. This MUST be enabled for feeds with no {`{date}`} placeholder.</Description>
+              <Description>Date checking ensures that articles that are either older than {botConfig.cycleMaxAge} day{botConfig.cycleMaxAge > 1 ? 's' : ''} or has invalid/no published dates are never sent. This MUST be enabled for feeds with no {'{date}'} placeholder.</Description>
               <Description>Default: {boolToText(botConfig.checkDates)}</Description>
             </div>
             <Checkbox checked={checkDates} toggle onChange={(e, data) => updateProperty(configKeyNames.checkDates, data.checked)} />
@@ -163,7 +166,7 @@ function MiscOptions () {
           <MiscOptionContainer>
             <div>
               <SectionItemTitle>Image Links Preview</SectionItemTitle>
-              <Description>Toggle automatic Discord image link embedded previews for image links found inside placeholders such as {`{description}`}.</Description>
+              <Description>Toggle automatic Discord image link embedded previews for image links found inside placeholders such as {'{description}'}.</Description>
               <Description>Default: {boolToText(botConfig.imgPreviews)}</Description>
             </div>
             <Checkbox checked={imgPreviews} toggle onChange={(e, data) => updateProperty(configKeyNames.imgPreviews, data.checked)} />
@@ -172,7 +175,7 @@ function MiscOptions () {
           <MiscOptionContainer>
             <div>
               <SectionItemTitle>Image Links Existence</SectionItemTitle>
-              <Description>Remove image links found inside placeholders such as {`{description}`}. If disabled, all image src links in such placeholders will be removed.</Description>
+              <Description>Remove image links found inside placeholders such as {'{description}'}. If disabled, all image src links in such placeholders will be removed.</Description>
               <Description>Default: {boolToText(botConfig.imgLinksExistence)}</Description>
             </div>
             <Checkbox checked={imgLinksExistence} toggle onChange={(e, data) => updateProperty(configKeyNames.imgLinksExistence, data.checked)} />
